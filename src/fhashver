@@ -5,6 +5,13 @@ import hashlib
 import sys
 
 
+def die(msg: str, header: str = "ERROR", code: int = 1) -> int:
+    """Return an exit code and print error"""
+
+    sys.stderr.write(f"{header}: {msg}\n")
+    return code
+
+
 def main() -> int:
     """Entry/main function"""
 
@@ -12,26 +19,33 @@ def main() -> int:
         return die("At least one argument required: hash_file")
 
     for hash_file in sys.argv[1:]:
-        with open(hash_file, "r", encoding="utf-8") as hashes:
-            for line in hashes:
-                hash_name, hash_value, filename = map(str.rstrip, line.split(" ", 2))
+        try:
+            with open(hash_file, "r", encoding="utf-8") as hashes:
+                for line in hashes:
+                    hash_name, hash_value, filename = map(
+                        str.rstrip, line.split(" ", 2)
+                    )
 
-                try:
-                    sys.stdout.write(f"{hash_name}: ")
-                    with open(filename, "rb") as source:
-                        calc_hash = getattr(hashlib, hash_name)(
-                            source.read()
-                        ).hexdigest()
+                    try:
+                        sys.stdout.write(f"{hash_name}: ")
+                        with open(filename, "rb") as source:
+                            calc_hash = getattr(hashlib, hash_name)(
+                                source.read()
+                            ).hexdigest()
 
-                    if calc_hash != hash_value:
-                        sys.stdout.write("failed\n")
-                        sys.exit(1)
+                        if calc_hash != hash_value:
+                            sys.stdout.write("failed\n")
+                            sys.exit(1)
 
-                    sys.stdout.write("passed\n")
-                except (FileNotFoundError, IsADirectoryError):
-                    sys.stdout.write("file_not_found\n")
-                except (TypeError, AttributeError):
-                    sys.stdout.write("unknown\n")
+                        sys.stdout.write("passed\n")
+                    except (FileNotFoundError, IsADirectoryError):
+                        sys.stdout.write("file_not_found\n")
+                    except (TypeError, AttributeError):
+                        sys.stdout.write("unknown\n")
+        except IsADirectoryError:
+            return die(f"{hash_file!r} is a directory")
+        except FileNotFoundError:
+            return die(f"{hash_file!r} not found")
 
     return 0
 
