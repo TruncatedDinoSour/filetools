@@ -25,7 +25,7 @@ def main() -> int:
                     print(
                         f"{hashf} {getattr(hashlib, hashf)(file.read()).hexdigest()} {file.name}"
                     )
-            except FileNotFoundError:
+            except (FileNotFoundError, IsADirectoryError):
                 die(f"File {filename!r} does not exist", "WARNING")
             except (TypeError, AttributeError):
                 pass

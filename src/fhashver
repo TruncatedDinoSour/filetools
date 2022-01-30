@@ -28,7 +28,7 @@ def main() -> int:
                         sys.exit(1)
 
                     sys.stdout.write("passed\n")
-                except FileNotFoundError:
+                except (FileNotFoundError, IsADirectoryError):
                     sys.stdout.write("file_not_found\n")
                 except (TypeError, AttributeError):
                     sys.stdout.write("unknown\n")
