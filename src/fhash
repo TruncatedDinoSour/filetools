@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+"""Generate file hashes and print to STDOUT"""
+
+import hashlib
+import sys
+
+
+def die(msg: str, header: str = "ERROR", code: int = 1) -> int:
+    """Return an exit code and print error"""
+
+    sys.stderr.write(f"{header}: {msg}\n")
+    return code
+
+
+def main() -> int:
+    """Entry/main function"""
+
+    if len(sys.argv) < 2:
+        return die("At least one argument required: file")
+
+    for hashf in hashlib.algorithms_available:
+        for filename in sys.argv[1:]:
+            try:
+                with open(filename, "rb") as file:
+                    print(
+                        f"{hashf} {getattr(hashlib, hashf)(file.read()).hexdigest()} {file.name}"
+                    )
+            except FileNotFoundError:
+                die(f"File {filename!r} does not exist", "WARNING")
+            except (TypeError, AttributeError):
+                pass
+
+    return 0
+
+
+if __name__ == "__main__":
+    assert main.__annotations__.get("return") is int, "main() should return an integer"
+    sys.exit(main())

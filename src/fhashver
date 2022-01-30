@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+"""Generate file hashes and print to STDOUT"""
+
+import hashlib
+import sys
+
+
+def main() -> int:
+    """Entry/main function"""
+
+    if len(sys.argv) < 2:
+        return die("At least one argument required: hash_file")
+
+    for hash_file in sys.argv[1:]:
+        with open(hash_file, "r", encoding="utf-8") as hashes:
+            for line in hashes:
+                hash_name, hash_value, filename = map(str.rstrip, line.split(" ", 2))
+
+                try:
+                    sys.stdout.write(f"{hash_name}: ")
+                    with open(filename, "rb") as source:
+                        calc_hash = getattr(hashlib, hash_name)(
+                            source.read()
+                        ).hexdigest()
+
+                    if calc_hash != hash_value:
+                        sys.stdout.write("failed\n")
+                        sys.exit(1)
+
+                    sys.stdout.write("passed\n")
+                except FileNotFoundError:
+                    sys.stdout.write("file_not_found\n")
+                except (TypeError, AttributeError):
+                    sys.stdout.write("unknown\n")
+
+    return 0
+
+
+if __name__ == "__main__":
+    assert main.__annotations__.get("return") is int, "main() should return an integer"
+    sys.exit(main())
