@@ -68,21 +68,20 @@ def get_file_info(path: str) -> None:
             "Owner username": pwd.getpwuid(stat.st_uid).pw_name,
             "Owner group name": grp.getgrgid(stat.st_gid).gr_name,
         },
-        "Access time": {
-            "Last access time": datetime.utcfromtimestamp(stat.st_atime).strftime(
-                "%Y/%m/%d %H:%M:%S %fµs"
-            ),
-            "Last modification time": datetime.utcfromtimestamp(stat.st_mtime).strftime(
-                "%Y/%m/%d %H:%M:%S %fµs"
-            ),
-            "CTime": datetime.utcfromtimestamp(stat.st_ctime).strftime(
-                "%Y/%m/%d %H:%M:%S %fµs"
-            ),
-        },
+        "Access time": {},
         "File content": {},
     }
 
     log(path, Fore.MAGENTA)
+
+    for name, access in (
+        ("Last access time", stat.st_atime),
+        ("Last modification time", stat.st_mtime),
+        ("CTime", stat.st_ctime),
+    ):
+        info["Access time"][name] = datetime.utcfromtimestamp(access).strftime(
+            "%Y/%m/%d %H:%M:%S.%f"
+        )
 
     try:
         with open(path, "r") as file:
